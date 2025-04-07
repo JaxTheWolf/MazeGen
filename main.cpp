@@ -1,80 +1,58 @@
 #include <cstdlib>
 #include <iostream>
+#include <optional>
 #include <vector>
+#include <stack>
+#include <sstream>
+
+#include "Cell.h"
+#include "functions.h"
 
 #define endl '\n'
 
-struct wallsOrPath {
-  bool top;
-  bool bottom;
-  bool left;
-  bool right;
-};
+int main(int argc, char *argv[]) {
+  int maze_x, maze_y, randSeed = 0;
+  bool flag = true;
 
-class Cell {
- public:
-  bool visited;
-  bool solution;
-  unsigned int x, y;
-  wallsOrPath walls;
-  wallsOrPath path;
-
-  static auto findCell(const std::vector<Cell> &grid, const unsigned int x, const unsigned int y) {
-    const unsigned long index = grid.size() - (x + y) - 1;
-    if (grid.size() >= x + y) return grid[index];
-    else return grid[x+y];
+  if (argc < 3) {
+    std::cerr << "Usage: " << argv[0] << " <X cells> <Y Cells> <srand() seed>" << endl;
+    return 1;
   }
 
-  [[nodiscard]] auto checkNeighbors(std::vector<Cell> grid) const {
-    std::vector<Cell> neighbors;
-    Cell top{}, bottom{}, left{}, right{};
-
-    top = Cell::findCell(grid, this->x, this->y - 1);
-    bottom = Cell::findCell(grid, this->x - 1, this->y);
-    left = Cell::findCell(grid, this->x, this->y + 1);
-    right = Cell::findCell(grid, this->x + 1, this->y);
-
-    if (!top.visited && top.x != this->x) neighbors.push_back(top);
-    if (!bottom.visited && bottom.x != this->x) neighbors.push_back(bottom);
-    if (!left.visited && bottom.x != this->x) neighbors.push_back(left);
-    if (!right.visited && bottom.x != this->x) neighbors.push_back(right);
-
-    return grid[std::rand() % neighbors.size() - 1];
+  for (int i = 1; i < argc; ++i) {
+    std::istringstream iss(argv[i]);
+    int number;
+    if (iss >> number) {
+      switch (i) {
+        case 1:
+          maze_x = number;
+          break;
+        case 2:
+          maze_y = number;
+          break;
+        case 3:
+          randSeed = number;
+          break;
+        default: ;
+      }
+    } else {
+      std::cerr << "Invalid argument: " << argv[i] << " is not an integer." << endl;
+    }
   }
-};
-
-class Maze {
- private:
-  int xSize = 0, ySize = 0;
-
- public:
-  std::vector<Cell> grid;
-};
-
-unsigned int maze_x, maze_y, randSeed = 0;
-
-int main(int argc, char* argv[]) {
-  // Populace velikosti bludiště
-  std::cout << "Zadejte šířku bludiště: ";
-  std::cin >> maze_x;
-  std::cout << "Zadejte výšku bludiště: ";
-  std::cin >> maze_y;
-  std::cout << "Zadejte seed: ";
-  std::cin >> randSeed;
 
   std::srand(randSeed);
 
-  Maze maze;
+  std::vector<Cell> grid;
 
-  for (unsigned int i = 0; i > maze_y; i++) {
-    for (unsigned int j = 0; j > maze_x; j++) {
+  for (int i = 0; i < maze_x; i++) {
+    for (int j = 0; j < maze_y; j++) {
       Cell cell{};
-      cell.x = i - 1;
-      cell.y = j - 1;
+      cell.x = i;
+      cell.y = j;
       cell.walls.top = cell.walls.bottom = cell.walls.left = cell.walls.right =
-          true;
+                                                             true;
       cell.path.top = cell.path.bottom = cell.path.left = cell.path.right =
-          false;
+                                                          false;
 
       if (i == 1 && j == 2) {
         cell.solution = true;
@@ -82,22 +60,46 @@ int main(int argc, char* argv[]) {
       } else {
         cell.solution = cell.visited = false;
       }
-      maze.grid.push_back(cell);
+      grid.push_back(cell);
     }
   }
 
- // if (argv[1]) {
-    for (size_t index = 0; index < maze.grid.size(); ++index) {
-      const Cell currentCell = maze.grid[index];
-      std::cout << "i: " << index;
-      std::cout << " X: " << currentCell.x << " Y: " << currentCell.y;
-      std::cout << " Sol: " << currentCell.solution
-                << " Vis: " << currentCell.visited << '\n';
+  std::stack<Cell> stack;
+  std::stack<Cell> solution;
+
+  Cell currentCell = grid[0];
+  std::optional nextCell = currentCell.checkNeighbors(grid);
+
+  do {
+    currentCell.visited = true;
+    if (nextCell.has_value()) {
+      nextCell->visited = true;
+      stack.push(nextCell.value());
+      removeWalls(currentCell, nextCell.value());
+      currentCell = nextCell.value();
+      if (flag) {
+        solution.push(currentCell);
+      }
+    } else if (!stack.empty()) {
+      if (currentCell.x == maze_x - 1 && currentCell.y == maze_y - 1) {
+        flag = false;
+      }
+      if (flag) {
+        solution.pop();
+      }
+    } else {
+      if (!solution.empty()) {
+        Cell previousCell = currentCell;
+        currentCell = solution.top();
+        currentCell.solution = true;
+        addSolutionPath(previousCell, currentCell);
+        solution.pop();
+      } else {
+        Cell previousCell = currentCell;
+        currentCell = grid[0];
+        addSolutionPath(previousCell, currentCell);
+      }
     }
-
-    const Cell randCell = maze.grid[0].checkNeighbors(maze.grid);
-
-    std::cout << Cell::findCell(maze.grid, 0, 1).visited << endl;
-    std::cout << randCell.x << " " << randCell.y << endl;
-//  }
+  } while (nextCell.has_value());
 }
+
