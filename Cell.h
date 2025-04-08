@@ -26,7 +26,7 @@ public:
     wallsOrPath path;
 
     static std::optional<Cell> findCell(const std::vector<Cell> &grid, const int x, const int y) {
-        for (const std::optional<Cell> cell: grid) {
+        for (const std::optional cell: grid) {
             if (cell && (cell->x == x && cell->y == y)) {
                 return cell;
             }
@@ -55,10 +55,6 @@ public:
         if (bottom && !bottom->visited) neighbors.push_back(*bottom);
         if (left && !left->visited) neighbors.push_back(*left);
         if (right && !right->visited) neighbors.push_back(*right);
-
-        for (auto cell: neighbors) {
-            std::cout << cell.x << ", " << cell.y << std::endl;
-        }
 
         return neighbors[std::rand() % neighbors.size()]; // NOLINT(cert-msc30-c, cert-msc50-cpp)
     }
