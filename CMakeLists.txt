@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.30)
 project(MazeGen)
 
 add_executable(${PROJECT_NAME} main.cpp
-        Cell.h
+        Cell.hpp
         functions.cpp
-        functions.h
+        functions.hpp
 )
 
 # Tell CMake we want to use C++17 and not to include language extensions

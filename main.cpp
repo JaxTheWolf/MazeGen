@@ -4,8 +4,8 @@
 #include <vector>
 #include <stack>
 
-#include "Cell.h"
-#include "functions.h"
+#include "Cell.hpp"
+#include "functions.hpp"
 
 #define endl '\n'
 

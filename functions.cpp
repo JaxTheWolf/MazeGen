@@ -5,8 +5,8 @@
 #include <sstream>
 #include <fstream>
 
-#include "Cell.h"
-#include "functions.h"
+#include "Cell.hpp"
+#include "functions.hpp"
 
 void handleInput(const int argc, char *argv[], int *xSize, int *ySize, int *seed) {
     for (int i = 1; i < argc; ++i) {
