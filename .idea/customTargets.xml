@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CLionExternalBuildManager">
+    <target id="c64d938f-70d3-47d7-868e-fff94037aa37" name="gen_docs" defaultType="TOOL">
+      <configuration id="f147fc72-2def-4a76-afdb-973a534d7cf7" name="gen_docs" toolchainName="Default" />
+    </target>
+  </component>
+</project>

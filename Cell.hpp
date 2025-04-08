@@ -1,5 +1,5 @@
 //
-// Created by jax on 7.4.25.
+// Created by Roman Lubij on 7.4.25.
 //
 
 #ifndef CELL_H
@@ -10,76 +10,85 @@
 #include <optional>
 #include <vector>
 
-struct wallsOrPath {
+///
+/// @brief Struktura pro zjednodušení práce se stěnami buněk.
+/// @param top Vrchní stěna
+/// @param bottom Spodní stěna
+/// @param left levá stěna
+/// @param right pravá stěna
+struct wallStruct {
     bool top;
     bool bottom;
     bool left;
     bool right;
 };
 
+///
+/// @class Cell
+/// @a Reference: https://en.cppreference.com/w/cpp/language/class
+/// @brief Třída, popisující 1 buňku bludiště.
+/// @param xCoord X-ový komponent souřadnice buňky
+/// @param yCoord Y-ový komponent souřadnice buňky
 class Cell {
 public:
-    bool visited, solution;
-    wallsOrPath walls, path;
+    bool visited;
+    wallStruct walls;
     int x, y;
 
     explicit Cell(int xCoord = 0, int yCoord = 0)
-        : visited(false), solution(false), walls({true, true, true, true}), path({false, false, false, false}),
+        : visited(false), walls({true, true, true, true}),
           x(xCoord),
           y(yCoord) {
-        std::cout << "Cell created at (" << x << ", " << y << ")\n";
     }
 
-    ~Cell() {
-        std::cout << "Cell (" << x << ", " << y << ") destroyed\n";
-    }
-
-
-    std::optional<Cell *> checkNeighbors(const std::vector<std::vector<Cell> > &grid, const int xSize,
-                                         const int ySize) {
+    ///
+    /// @brief Nalezne sousední buňky kolem buňky[xSize, ySize] a vrátí z nich jednou, náhodně.
+    /// @param xSize Šířka bludiště
+    /// @param ySize Výška bludiště
+    /// @param grid Mřížka buňek
+    /// @return Cell* NEBO std::nullopt
+    std::optional<Cell *> checkNeighbors(const int xSize, const int ySize,
+                                         const std::vector<std::vector<Cell> > &grid) {
         std::vector<Cell *> neighbors;
 
-        // Top neighbor
+        // Vrchní soused
         if (y - 1 >= 0) {
             Cell *top = const_cast<Cell *>(&grid[x][y - 1]);
-            std::cout << "Top neighbor: " << top->x << ", " << top->y << std::endl;
             if (!top->visited) {
                 neighbors.push_back(top);
             }
         }
 
-        // Bottom neighbor
+        // Spodní soused
         if (y + 1 < ySize) {
             Cell *bottom = const_cast<Cell *>(&grid[x][y + 1]);
-            std::cout << "Bottom neighbor: " << bottom->x << ", " << bottom->y << std::endl;
             if (!bottom->visited) {
                 neighbors.push_back(bottom);
             }
         }
 
-        // Left neighbor
+        // Levý soused
         if (x - 1 >= 0) {
             Cell *left = const_cast<Cell *>(&grid[x - 1][y]);
-            std::cout << "Left neighbor: " << left->x << ", " << left->y << std::endl;
             if (!left->visited) {
                 neighbors.push_back(left);
             }
         }
 
-        // Right neighbor
+        // Pravý soused
         if (x + 1 < xSize) {
             Cell *right = const_cast<Cell *>(&grid[x + 1][y]);
-            std::cout << "Right neighbor: " << right->x << ", " << right->y << std::endl;
             if (!right->visited) {
                 neighbors.push_back(right);
             }
         }
 
-        // Return a random unvisited neighbor if any found
+        // Pokud byli sousedi nalezeni, vrať náíhodného z neighbors
         if (!neighbors.empty()) {
             return neighbors[std::rand() % neighbors.size()];
         }
-        return std::nullopt; // No unvisited neighbors found
+        // ... pokud ne, nullopt
+        return std::nullopt;
     }
 };
 

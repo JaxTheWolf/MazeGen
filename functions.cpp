@@ -1,14 +1,23 @@
 //
-// Created by jax on 7.4.25.
+// Created by Roman Lubij on 7.4.25.
 //
 
 #include <sstream>
 #include <fstream>
+#include <stack>
 
 #include "Cell.hpp"
 #include "functions.hpp"
 
-void handleInput(const int argc, char *argv[], int *xSize, int *ySize, int *seed) {
+///
+/// @brief Populuje dimenze bludiště a náhodný seed.
+/// @a Reference: https://stackoverflow.com/questions/2797813/how-to-convert-a-command-line-argument-to-int
+/// @param argc Počet argumentů
+/// @param argv Array argumentů
+/// @param xSize Šířka bludiště
+/// @param ySize Výška bludiště
+/// @param seed Seed pro srand()
+int handleInput(const int argc, char *argv[], int *xSize, int *ySize, int *seed) {
     for (int i = 1; i < argc; ++i) {
         std::istringstream iss(argv[i]);
         if (int number; iss >> number) {
@@ -25,120 +34,166 @@ void handleInput(const int argc, char *argv[], int *xSize, int *ySize, int *seed
                 default: ;
             }
         } else {
-            std::cerr << "Invalid argument: " << argv[i] << " is not an integer." << std::endl;
+            std::cerr << "Nesprávný argument: " << argv[i] << " není číslo." << '\n';
         }
     }
     if (argc < 3) {
-        std::cerr << "Usage: " << argv[0] << " <X cells> <Y Cells> <srand() seed>" << std::endl;
+        std::cerr << "Použití: " << argv[0] << " <X buňek> <Y buňek> <srand() seed>" << '\n';
+        return 1;
     }
+    return 0;
 }
 
-void initGrid(std::vector<std::vector<Cell>> &grid, const int xSize, const int ySize) {
+///
+/// @brief Připraví 2D vektor<Cell> a naplní jej.
+/// @param xSize Šířka bludiště
+/// @param ySize Výška bludiště
+/// @param grid Mřížka buňek
+void initGrid(const int xSize, const int ySize, std::vector<std::vector<Cell> > &grid) {
+    // Musíme nastavit velikost vektoru v ose X
     grid.resize(xSize);
     for (int i = 0; i < xSize; i++) {
+        // ... a také vektorů v ose Y
         grid.at(i).resize(ySize);
-        // std::cout << "Initializing row " << i << " of " << xSize << "..." << std::endl;
         for (int j = 0; j < ySize; j++) {
-            Cell cell;
-            cell.x = i;
-            cell.y = j;
-            grid.at(i).at(j) = cell;
-            // std::cout << "Initializing cell " << i << "," << j << " of " << xSize << "x" << ySize << "..." << std::endl;
+            // Zde se děje samosatatné plnění buňek
+            grid.at(i).at(j) = Cell(i, j);
         }
     }
-    // std::cout << "Grid of size " << grid.size() << " ready" << std::endl;
 }
 
+///
+/// @brief Odstraní sousední stěny mezi 2 buňkami.
+/// @a Reference: https://github.com/NacerKROUDIR/MazeGeneration/blob/main/Maze_Generator.py
+/// @param firstCell První buňka
+/// @param secondCell Druhá buňka
+/// @param grid Mřížka buněk
 void removeWalls(const Cell &firstCell, const Cell &secondCell, std::vector<std::vector<Cell> > &grid) {
     if (firstCell.x == secondCell.x) {
-        // Same column
+        // Buňky se nachází ve stejném sloupci
         if (firstCell.y < secondCell.y) {
-            grid[firstCell.y][firstCell.x].walls.bottom = false; // Remove bottom wall of cell 1
-            grid[secondCell.y][secondCell.x].walls.top = false; // Remove top wall of cell 2
+            // Odstraníme spodek firstCell a vršek secondCell
+            grid[firstCell.y][firstCell.x].walls.bottom = false;
+            grid[secondCell.y][secondCell.x].walls.top = false;
         } else if (firstCell.y > secondCell.y) {
-            grid[firstCell.y][firstCell.x].walls.top = false; // Remove top wall of cell 1
-            grid[secondCell.y][secondCell.x].walls.bottom = false; // Remove bottom wall of cell 2
+            // Odstraníme vršek firstCell a spodek secondCell
+            grid[firstCell.y][firstCell.x].walls.top = false;
+            grid[secondCell.y][secondCell.x].walls.bottom = false;
         }
     } else if (firstCell.y == secondCell.y) {
-        // Same row
+        // Buňky se nachází ve stejném řádku
         if (firstCell.x < secondCell.x) {
+            // Odstraníme pravou stěnu firstCell a levou stěnu secondCell
             grid[firstCell.y][firstCell.x].walls.right = false; // Remove right wall of cell 1
             grid[secondCell.y][secondCell.x].walls.left = false; // Remove left wall of cell 2
         } else if (firstCell.x > secondCell.x) {
-            grid[firstCell.y][firstCell.x].walls.left = false; // Remove left wall of cell 1
-            grid[secondCell.y][secondCell.x].walls.right = false; // Remove right wall of cell 2
+            // Odstraníme levou stěnu firstCell a pravou stěnu secondCell
+            grid[firstCell.y][firstCell.x].walls.left = false;
+            grid[secondCell.y][secondCell.x].walls.right = false;
         }
     }
 }
 
-void addSolutionPath(const Cell &firstCell, const Cell &secondCell, std::vector<std::vector<Cell> > &grid) {
-    grid[firstCell.y][firstCell.x].path.bottom = (firstCell.y < secondCell.y); // Example: Set directions based on relative positions
-    grid[firstCell.y][firstCell.x].path.right = (firstCell.x < secondCell.x);
-    grid[secondCell.y][secondCell.x].path.top = (secondCell.y < firstCell.y);
-    grid[secondCell.y][secondCell.x].path.left = (secondCell.x < firstCell.x);
+///
+/// @brief Tato funkce vygeneruje samotné bludiště; náhodně projde všechny buňky a vhodně jim nastaví stěny tak, aby vytvořili bludiště s aspoň jedním řešením.
+/// @a Reference: https://github.com/NacerKROUDIR/MazeGeneration/blob/main/Maze_Generator.py
+/// @param xSize Šířka bludiště
+/// @param ySize Výška bludiště
+/// @param grid Mřížka buňek
+void generateMaze(const int xSize, const int ySize, std::vector<std::vector<Cell> > &grid) {
+    std::stack<Cell *> stack;
+
+    Cell *current = &grid.at(0).at(0);
+    current->visited = true;
+    current->walls.top = false;
+    stack.push(current);
+
+    while (!stack.empty()) {
+        current = stack.top();
+
+        auto possibleNeighbor = current->checkNeighbors(xSize, ySize, grid);
+        if (possibleNeighbor) {
+            Cell *next = &grid.at(possibleNeighbor.value()->x).at(possibleNeighbor.value()->y);
+
+            removeWalls(*current, *next, grid);
+
+            next->visited = true;
+            stack.push(next);
+        } else {
+            stack.pop();
+        }
+    }
+    grid.at(xSize - 1).at(ySize - 1).walls.bottom = false;
 }
 
-void generateSVG(const std::vector<std::vector<Cell> > &grid, int mazeX, int mazeY, const std::string &filename) {
-    constexpr int cellSize = 20; // Size of each cell (in pixels) in the SVG output
-    constexpr int strokeWidth = 2; // Thickness of the walls
-    const int width = mazeX * cellSize; // Width of the maze in pixels
-    const int height = mazeY * cellSize; // Height of the maze in pixels
+///
+/// @brief Vygeneruje SVG vyobrazení daného 2D vektoru<Cell>.
+/// @a Reference: https://www.w3schools.com/graphics/svg_intro.asp a mnoho bolesti
+/// @param xSize Šířka bludiště
+/// @param ySize Výška bludiště
+/// @param grid Mřížka buňek
+/// @param filename Název výstupního souboru
+void generateSVG(int xSize, int ySize, const std::vector<std::vector<Cell> > &grid, const std::string &filename) {
+    constexpr int cellSize = 20; // Velikost každé buňky (px)
+    constexpr int strokeWidth = 3; // Šířka stěn (px)
+    const int width = xSize * cellSize; // Šířka bludiště (px)
+    const int height = ySize * cellSize; // Výška bludiště (px)
 
-    // Open the output SVG file
+    // Otevření výstupního souboru jako stream
     std::ofstream svgFile(filename);
     if (!svgFile.is_open()) {
-        std::cerr << "Error: Could not open file " << filename << " for writing." << std::endl;
+        std::cerr << "Chyba: Nelze otevřít soubor  " << filename << " pro zápis." << '\n';
         return;
     }
 
-    // Write the SVG header
+    // Vypsání hlavičky SVG souboru
     svgFile << "<svg xmlns=\"http://www.w3.org/2000/svg\" ";
     svgFile << "width=\"" << width << "\" height=\"" << height << "\" ";
-    svgFile << "viewBox=\"0 0 " << width << " " << height << "\">" << std::endl;
-    svgFile << "<rect width=\"" << width << "\" height=\"" << height << "\" fill=\"white\" />" << std::endl;
+    svgFile << "viewBox=\"0 0 " << width << " " << height << "\">" << '\n';
+    svgFile << "<rect width=\"" << width << "\" height=\"" << height << "\" fill=\"white\" />" << '\n';
 
-    // Iterate through the grid and draw walls for each cell
-    for (int y = 0; y < mazeY; ++y) {
-        for (int x = 0; x < mazeX; ++x) {
-            const Cell &cell = grid[y][x];
+    // Iterativně projdeme všechny buňky a vykreslíme jejich stěny
+    for (int row = 0; row < ySize; ++row) {
+        for (int col = 0; col < xSize; ++col) {
+            const Cell &cell = grid[row][col];
 
-            // Calculate the cell's top-left corner in SVG coordinate space
-            int xPos = x * cellSize;
-            int yPos = y * cellSize;
+            // Vypočítání souřadnic buňek v prostoru SVG
+            int xPos = col * cellSize;
+            int yPos = row * cellSize;
 
-            // Draw the top wall
+            // Kreslení vrchní stěnmy...
             if (cell.walls.top) {
                 svgFile << "<line x1=\"" << xPos << "\" y1=\"" << yPos << "\" x2=\"" << (xPos + cellSize)
                         << "\" y2=\"" << yPos << "\" "
-                        << "stroke=\"black\" stroke-width=\"" << strokeWidth << "\" />" << std::endl;
+                        << "stroke=\"black\" stroke-width=\"" << strokeWidth << "\" />" << '\n';
             }
 
-            // Draw the bottom wall
+            // ... spodní stěny
             if (cell.walls.bottom) {
                 svgFile << "<line x1=\"" << xPos << "\" y1=\"" << (yPos + cellSize) << "\" x2=\"" << (xPos + cellSize)
                         << "\" y2=\"" << (yPos + cellSize) << "\" "
-                        << "stroke=\"black\" stroke-width=\"" << strokeWidth << "\" />" << std::endl;
+                        << "stroke=\"black\" stroke-width=\"" << strokeWidth << "\" />" << '\n';
             }
 
-            // Draw the left wall
+            // ... levé stěny
             if (cell.walls.left) {
                 svgFile << "<line x1=\"" << xPos << "\" y1=\"" << yPos << "\" x2=\"" << xPos << "\" y2=\""
                         << (yPos + cellSize) << "\" "
-                        << "stroke=\"black\" stroke-width=\"" << strokeWidth << "\" />" << std::endl;
+                        << "stroke=\"black\" stroke-width=\"" << strokeWidth << "\" />" << '\n';
             }
 
-            // Draw the right wall
+            // ... a pravé stěny
             if (cell.walls.right) {
                 svgFile << "<line x1=\"" << (xPos + cellSize) << "\" y1=\"" << yPos << "\" x2=\"" << (xPos + cellSize)
                         << "\" y2=\"" << (yPos + cellSize) << "\" "
-                        << "stroke=\"black\" stroke-width=\"" << strokeWidth << "\" />" << std::endl;
+                        << "stroke=\"black\" stroke-width=\"" << strokeWidth << "\" />" << '\n';
             }
         }
     }
 
-    // Close the SVG
-    svgFile << "</svg>" << std::endl;
+    // Uzavření streamu souboru
+    svgFile << "</svg>" << '\n';
     svgFile.close();
 
-    std::cout << "Maze SVG generated and saved to " << filename << std::endl;
+    std::cout << "SVG soubor s bludištěm uložen do " << filename << '\n';
 }
