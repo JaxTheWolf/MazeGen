@@ -19,44 +19,54 @@ struct wallsOrPath {
 
 class Cell {
 public:
-    bool visited;
-    bool solution;
-    int x, y;
-    wallsOrPath walls;
-    wallsOrPath path;
+    bool visited, solution;
+    wallsOrPath walls, path;
+    int x,y ;
 
-    static std::optional<Cell> findCell(const std::vector<Cell> &grid, const int x, const int y) {
-        for (const std::optional cell: grid) {
-            if (cell && (cell->x == x && cell->y == y)) {
-                return cell;
-            }
-        }
-        return std::nullopt;
+    explicit Cell(int xCoord = 0, int yCoord = 0)
+        : x(xCoord), y(yCoord), visited(false), solution(false), walls({true, true, true, true}), path({false, false, false, false}) {
     }
 
-    auto checkNeighbors(const std::vector<Cell> &grid) const {
-        // NOLINT(*-use-nodiscard)
-        std::vector<Cell> neighbors;
-        std::optional<Cell> top{}, bottom{}, left{}, right{};
-        if (this->y - 1 >= 0 && this->y - 1 < grid.size() - 1) {
-            top = findCell(grid, this->x, this->y - 1);
-        }
-        if (this->y + 1 < grid.size() - 1) {
-            bottom = findCell(grid, this->x, this->y + 1);
-        }
-        if (this->x - 1 >= 0 && this->x - 1 < grid.size() - 1) {
-            left = findCell(grid, this->x - 1, this->y);
-        }
-        if (this->y + 1 < grid.size() - 1) {
-            right = findCell(grid, this->x + 1, this->y);
+    std::optional<Cell*> checkNeighbors(const std::vector<std::vector<Cell>> &grid, const int xSize, const int ySize) {
+        std::vector<Cell*> neighbors;
+
+        // Top neighbor
+        if (y - 1 >= 0) {
+            Cell* top = const_cast<Cell*>(&grid[y - 1][x]);
+            if (!top->visited) {
+                neighbors.push_back(top);
+            }
         }
 
-        if (top && !top->visited) neighbors.push_back(*top);
-        if (bottom && !bottom->visited) neighbors.push_back(*bottom);
-        if (left && !left->visited) neighbors.push_back(*left);
-        if (right && !right->visited) neighbors.push_back(*right);
+        // Bottom neighbor
+        if (y + 1 < ySize) {
+            Cell* bottom = const_cast<Cell*>(&grid[y + 1][x]);
+            if (!bottom->visited) {
+                neighbors.push_back(bottom);
+            }
+        }
 
-        return neighbors[std::rand() % neighbors.size()]; // NOLINT(cert-msc30-c, cert-msc50-cpp)
+        // Left neighbor
+        if (x - 1 >= 0) {
+            Cell* left = const_cast<Cell*>(&grid[y][x - 1]);
+            if (!left->visited) {
+                neighbors.push_back(left);
+            }
+        }
+
+        // Right neighbor
+        if (x + 1 < xSize) {
+            Cell* right = const_cast<Cell*>(&grid[y][x + 1]);
+            if (!right->visited) {
+                neighbors.push_back(right);
+            }
+        }
+
+        // Return a random unvisited neighbor if any found
+        if (!neighbors.empty()) {
+            return neighbors[std::rand() % neighbors.size()];
+        }
+        return std::nullopt; // No unvisited neighbors found
     }
 };
 

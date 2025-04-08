@@ -1,16 +1,16 @@
 //
-// Created by jax on 7.4.25.
+// Created by jax on 8.4.25.
 //
 
 #ifndef FUNCTIONS_H
 #define FUNCTIONS_H
 
-void handleInput(int argc, char *argv[], int* xSize, int* ySize, int* seed);
+void handleInput(const int argc, char *argv[], int *xSize, int *ySize, int *seed);
 
-void removeWalls(Cell &current, Cell &next);
+void initGrid(std::vector<std::vector<Cell>> &grid, const int xSize, const int ySize);
 
-void addSolutionPath(Cell &previous, Cell &current);
+void removeWalls(const Cell &firstCell, const Cell &secondCell, std::vector<std::vector<Cell> > &grid);
 
-void initGrid(std::vector<Cell> &grid, int xSize, int ySize);
+void generateSVG(const std::vector<std::vector<Cell>> &grid, int mazeX, int mazeY, const std::string &filename);
 
 #endif //FUNCTIONS_H
