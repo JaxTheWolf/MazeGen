@@ -1,3 +1,0 @@
-/home/jax/Seafile/Projects/Code/CLionProjects/MazeGen/cmake-build-debug/CMakeFiles/MazeGen.dir
-/home/jax/Seafile/Projects/Code/CLionProjects/MazeGen/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/jax/Seafile/Projects/Code/CLionProjects/MazeGen/cmake-build-debug/CMakeFiles/rebuild_cache.dir
