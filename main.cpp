@@ -28,6 +28,9 @@ int main(const int argc, char *argv[]) {
   current->visited = true;
   stack.push(current);
 
+  std::cout << rand() << endl;
+  std::cout << rand() << endl;
+
   while (!stack.empty()) {
     current = stack.top();
 

@@ -37,16 +37,16 @@ void initGrid(std::vector<std::vector<Cell>> &grid, const int xSize, const int y
     grid.resize(xSize);
     for (int i = 0; i < xSize; i++) {
         grid.at(i).resize(ySize);
-        std::cout << "Initializing row " << i << " of " << xSize << "..." << std::endl;
+        // std::cout << "Initializing row " << i << " of " << xSize << "..." << std::endl;
         for (int j = 0; j < ySize; j++) {
             Cell cell;
             cell.x = i;
             cell.y = j;
             grid.at(i).at(j) = cell;
-            std::cout << "Initializing cell " << i << "," << j << " of " << xSize << "x" << ySize << "..." << std::endl;
+            // std::cout << "Initializing cell " << i << "," << j << " of " << xSize << "x" << ySize << "..." << std::endl;
         }
     }
-    std::cout << "Grid of size " << grid.size() << " ready" << std::endl;
+    // std::cout << "Grid of size " << grid.size() << " ready" << std::endl;
 }
 
 void removeWalls(const Cell &firstCell, const Cell &secondCell, std::vector<std::vector<Cell> > &grid) {
