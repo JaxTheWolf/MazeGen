@@ -136,8 +136,8 @@ void generateMaze(const int xSize, const int ySize, std::vector<std::vector<Cell
 void generateSVG(int xSize, int ySize, const std::vector<std::vector<Cell> > &grid, const std::string &filename) {
     constexpr int cellSize = 20; // Velikost každé buňky (px)
     constexpr int strokeWidth = 3; // Šířka stěn (px)
-    const int width = xSize * cellSize; // Šířka bludiště (px)
-    const int height = ySize * cellSize; // Výška bludiště (px)
+    const int width = xSize * cellSize + 2*strokeWidth; // Šířka bludiště (px)
+    const int height = ySize * cellSize + 2*strokeWidth; // Výška bludiště (px)
 
     // Otevření výstupního souboru jako stream
     std::ofstream svgFile(filename);
@@ -158,8 +158,8 @@ void generateSVG(int xSize, int ySize, const std::vector<std::vector<Cell> > &gr
             const Cell &cell = grid[row][col];
 
             // Vypočítání souřadnic buňek v prostoru SVG
-            int xPos = col * cellSize;
-            int yPos = row * cellSize;
+            int xPos = col * cellSize + strokeWidth;
+            int yPos = row * cellSize + strokeWidth;
 
             // Kreslení vrchní stěnmy...
             if (cell.walls.top) {
