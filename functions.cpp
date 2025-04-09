@@ -52,12 +52,12 @@ int handleInput(const int argc, char *argv[], int *xSize, int *ySize, int *seed)
 void initGrid(const int xSize, const int ySize, std::vector<std::vector<Cell> > &grid) {
     // Musíme nastavit velikost vektoru v ose X
     grid.resize(xSize);
-    for (int i = 0; i < xSize; i++) {
+    for (int row = 0; row < xSize; row++) {
         // ... a také vektorů v ose Y
-        grid.at(i).resize(ySize);
-        for (int j = 0; j < ySize; j++) {
+        grid.at(row).resize(ySize);
+        for (int col = 0; col < ySize; col++) {
             // Zde se děje samosatatné plnění buňek
-            grid.at(i).at(j) = Cell(i, j);
+            grid.at(row).at(col) = Cell(col, row);
         }
     }
 }
@@ -113,7 +113,7 @@ void generateMaze(const int xSize, const int ySize, std::vector<std::vector<Cell
 
         auto possibleNeighbor = current->checkNeighbors(xSize, ySize, grid);
         if (possibleNeighbor) {
-            Cell *next = &grid.at(possibleNeighbor.value()->x).at(possibleNeighbor.value()->y);
+            Cell *next = &grid.at(possibleNeighbor.value()->y).at(possibleNeighbor.value()->x);
 
             removeWalls(*current, *next, grid);
 
@@ -123,7 +123,7 @@ void generateMaze(const int xSize, const int ySize, std::vector<std::vector<Cell
             stack.pop();
         }
     }
-    grid.at(xSize - 1).at(ySize - 1).walls.bottom = false;
+    grid.at(ySize - 1).at(xSize - 1).walls.bottom = false;
 }
 
 ///

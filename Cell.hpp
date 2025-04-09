@@ -53,7 +53,7 @@ public:
 
         // Vrchní soused
         if (y - 1 >= 0) {
-            Cell *top = const_cast<Cell *>(&grid[x][y - 1]);
+            Cell *top = const_cast<Cell *>(&grid.at(y - 1).at(x));
             if (!top->visited) {
                 neighbors.push_back(top);
             }
@@ -61,7 +61,7 @@ public:
 
         // Spodní soused
         if (y + 1 < ySize) {
-            Cell *bottom = const_cast<Cell *>(&grid[x][y + 1]);
+            Cell *bottom = const_cast<Cell *>(&grid.at(y + 1).at(x));
             if (!bottom->visited) {
                 neighbors.push_back(bottom);
             }
@@ -69,7 +69,7 @@ public:
 
         // Levý soused
         if (x - 1 >= 0) {
-            Cell *left = const_cast<Cell *>(&grid[x - 1][y]);
+            Cell *left = const_cast<Cell *>(&grid.at(y).at(x - 1));
             if (!left->visited) {
                 neighbors.push_back(left);
             }
@@ -77,7 +77,7 @@ public:
 
         // Pravý soused
         if (x + 1 < xSize) {
-            Cell *right = const_cast<Cell *>(&grid[x + 1][y]);
+            Cell *right = const_cast<Cell *>(&grid.at(y).at(x + 1));
             if (!right->visited) {
                 neighbors.push_back(right);
             }
