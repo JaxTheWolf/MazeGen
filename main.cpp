@@ -7,7 +7,6 @@
 
 #define endl '\n'
 
-// T0DO: Make the coordinate systems concise. Something isn't right (cell.h)
 
 ///
 /// @brief "entrypoint" našeho programu
@@ -23,7 +22,7 @@ int main(const int argc, char *argv[]) {
     return 1;
   }
   // Vytvoření a iniciální populace 2D vektoru objektů Cell
-  std::vector<std::vector<Cell>> grid;
+  std::vector<std::vector<Cell> > grid;
   initGrid(maze_x, maze_y, grid);
   // nastavení srand() seedu
   std::srand(randSeed);

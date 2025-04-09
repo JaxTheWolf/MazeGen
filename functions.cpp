@@ -2,6 +2,7 @@
 // Created by Roman Lubij on 7.4.25.
 //
 
+#include <iostream>
 #include <sstream>
 #include <fstream>
 #include <stack>
@@ -103,7 +104,7 @@ void removeWalls(const Cell &firstCell, const Cell &secondCell, std::vector<std:
 void generateMaze(const int xSize, const int ySize, std::vector<std::vector<Cell> > &grid) {
     std::stack<Cell *> stack;
 
-    Cell *current = &grid.at(0).at(0);
+    Cell *current = &grid.at(0).at(std::rand() % xSize); // NOLINT(cert-msc30-c, cert-msc50-cpp)
     current->visited = true;
     current->walls.top = false;
     stack.push(current);
@@ -123,7 +124,8 @@ void generateMaze(const int xSize, const int ySize, std::vector<std::vector<Cell
             stack.pop();
         }
     }
-    grid.at(ySize - 1).at(xSize - 1).walls.bottom = false;
+
+    grid.at(ySize - 1).at(std::rand() % xSize).walls.bottom = false; // NOLINT(cert-msc30-c, cert-msc50-cpp)
 }
 
 ///
@@ -136,8 +138,8 @@ void generateMaze(const int xSize, const int ySize, std::vector<std::vector<Cell
 void generateSVG(int xSize, int ySize, const std::vector<std::vector<Cell> > &grid, const std::string &filename) {
     constexpr int cellSize = 20; // Velikost každé buňky (px)
     constexpr int strokeWidth = 3; // Šířka stěn (px)
-    const int width = xSize * cellSize + 2*strokeWidth; // Šířka bludiště (px)
-    const int height = ySize * cellSize + 2*strokeWidth; // Výška bludiště (px)
+    const int width = xSize * cellSize + 2 * strokeWidth; // Šířka bludiště (px)
+    const int height = ySize * cellSize + 2 * strokeWidth; // Výška bludiště (px)
 
     // Otevření výstupního souboru jako stream
     std::ofstream svgFile(filename);

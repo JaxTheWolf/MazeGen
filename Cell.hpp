@@ -6,7 +6,6 @@
 #define CELL_H
 
 #include <cstdlib>
-#include <iostream>
 #include <optional>
 #include <vector>
 
@@ -47,8 +46,8 @@ public:
     /// @param ySize Výška bludiště
     /// @param grid Mřížka buňek
     /// @return Cell* NEBO std::nullopt
-    std::optional<Cell *> checkNeighbors(const int xSize, const int ySize,
-                                         const std::vector<std::vector<Cell> > &grid) {
+    [[nodiscard]] std::optional<Cell *> checkNeighbors(const int xSize, const int ySize,
+                                         const std::vector<std::vector<Cell> > &grid) const {
         std::vector<Cell *> neighbors;
 
         // Vrchní soused
@@ -85,7 +84,7 @@ public:
 
         // Pokud byli sousedi nalezeni, vrať náíhodného z neighbors
         if (!neighbors.empty()) {
-            return neighbors[std::rand() % neighbors.size()];
+            return neighbors[std::rand() % neighbors.size()]; // NOLINT(cert-msc30-c, cert-msc50-cpp)
         }
         // ... pokud ne, nullopt
         return std::nullopt;
