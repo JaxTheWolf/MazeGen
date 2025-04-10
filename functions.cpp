@@ -106,14 +106,12 @@ void generateMaze(const int xSize, const int ySize, std::vector<std::vector<Cell
 
     Cell *current = &grid.at(0).at(std::rand() % xSize); // NOLINT(cert-msc30-c, cert-msc50-cpp)
     current->visited = true;
-    current->walls.top = false;
     stack.push(current);
 
     while (!stack.empty()) {
         current = stack.top();
 
-        auto possibleNeighbor = current->checkNeighbors(xSize, ySize, grid);
-        if (possibleNeighbor) {
+        if (auto possibleNeighbor = current->checkNeighbors(xSize, ySize, grid)) {
             Cell *next = &grid.at(possibleNeighbor.value()->y).at(possibleNeighbor.value()->x);
 
             removeWalls(*current, *next, grid);
@@ -125,7 +123,25 @@ void generateMaze(const int xSize, const int ySize, std::vector<std::vector<Cell
         }
     }
 
-    grid.at(ySize - 1).at(std::rand() % xSize).walls.bottom = false; // NOLINT(cert-msc30-c, cert-msc50-cpp)
+}
+
+void setEntranceAndExit(const int xSize, const int ySize, std::vector<std::vector<Cell> > &grid) {
+    const int side = std::rand() % 2; // NOLINT(cert-msc30-c, cert-msc50-cpp)
+    std::cout << "side: " << side << '\n';
+
+    switch (side) {
+        // 0: Vstup/výstup na horní/spodní straně
+        case 0:
+            grid.at(0).at(std::rand() % xSize).walls.top = false; // NOLINT(cert-msc30-c, cert-msc50-cpp)
+            grid.at(ySize - 1).at(std::rand() % xSize).walls.bottom = false; // NOLINT(cert-msc30-c, cert-msc50-cpp)
+            break;
+        // 1: Vstup/výstup na levé/pravé straně
+        case 1:
+            grid.at(std::rand() % ySize).at(0).walls.left = false; // NOLINT(cert-msc30-c, cert-msc50-cpp)
+            grid.at(std::rand() % ySize).at(xSize - 1).walls.right = false; // NOLINT(cert-msc30-c, cert-msc50-cpp)
+            break;
+        default:
+    }
 }
 
 ///
@@ -152,7 +168,7 @@ void generateSVG(int xSize, int ySize, const std::vector<std::vector<Cell> > &gr
     svgFile << "<svg xmlns=\"http://www.w3.org/2000/svg\" ";
     svgFile << "width=\"" << width << "\" height=\"" << height << "\" ";
     svgFile << "viewBox=\"0 0 " << width << " " << height << "\">" << '\n';
-    svgFile << "<rect width=\"" << width << "\" height=\"" << height << "\" fill=\"white\" />" << '\n';
+    svgFile << "<rect width=\"" << width << "\" height=\"" << height << "\" fill=\"white\" />" << '\n'; // NOLINT (modernize-raw-string-literal)
 
     // Iterativně projdeme všechny buňky a vykreslíme jejich stěny
     for (int row = 0; row < ySize; ++row) {
@@ -167,28 +183,28 @@ void generateSVG(int xSize, int ySize, const std::vector<std::vector<Cell> > &gr
             if (cell.walls.top) {
                 svgFile << "<line x1=\"" << xPos << "\" y1=\"" << yPos << "\" x2=\"" << (xPos + cellSize)
                         << "\" y2=\"" << yPos << "\" "
-                        << "stroke=\"black\" stroke-width=\"" << strokeWidth << "\" />" << '\n';
+                        << "stroke=\"black\" stroke-width=\"" << strokeWidth << "\" />" << '\n';  // NOLINT (modernize-raw-string-literal)
             }
 
             // ... spodní stěny
             if (cell.walls.bottom) {
                 svgFile << "<line x1=\"" << xPos << "\" y1=\"" << (yPos + cellSize) << "\" x2=\"" << (xPos + cellSize)
                         << "\" y2=\"" << (yPos + cellSize) << "\" "
-                        << "stroke=\"black\" stroke-width=\"" << strokeWidth << "\" />" << '\n';
+                        << "stroke=\"black\" stroke-width=\"" << strokeWidth << "\" />" << '\n';  // NOLINT (modernize-raw-string-literal)
             }
 
             // ... levé stěny
             if (cell.walls.left) {
                 svgFile << "<line x1=\"" << xPos << "\" y1=\"" << yPos << "\" x2=\"" << xPos << "\" y2=\""
                         << (yPos + cellSize) << "\" "
-                        << "stroke=\"black\" stroke-width=\"" << strokeWidth << "\" />" << '\n';
+                        << "stroke=\"black\" stroke-width=\"" << strokeWidth << "\" />" << '\n';  // NOLINT (modernize-raw-string-literal)
             }
 
             // ... a pravé stěny
             if (cell.walls.right) {
                 svgFile << "<line x1=\"" << (xPos + cellSize) << "\" y1=\"" << yPos << "\" x2=\"" << (xPos + cellSize)
                         << "\" y2=\"" << (yPos + cellSize) << "\" "
-                        << "stroke=\"black\" stroke-width=\"" << strokeWidth << "\" />" << '\n';
+                        << "stroke=\"black\" stroke-width=\"" << strokeWidth << "\" />" << '\n';  // NOLINT (modernize-raw-string-literal)
             }
         }
     }

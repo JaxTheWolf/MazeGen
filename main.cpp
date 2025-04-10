@@ -29,6 +29,9 @@ int main(const int argc, char *argv[]) {
 
   // Samotné generování bludiště pomocí DFS
   generateMaze(maze_x, maze_y, grid);
+
+  setEntranceAndExit(maze_x, maze_y, grid);
+
   // Následovné generování výstupního SVG
   generateSVG(maze_x, maze_y, grid, "maze.svg");
 }
