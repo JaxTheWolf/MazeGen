@@ -126,10 +126,7 @@ void generateMaze(const int xSize, const int ySize, std::vector<std::vector<Cell
 }
 
 void setEntranceAndExit(const int xSize, const int ySize, std::vector<std::vector<Cell> > &grid) {
-    const int side = std::rand() % 2; // NOLINT(cert-msc30-c, cert-msc50-cpp)
-    std::cout << "side: " << side << '\n';
-
-    switch (side) {
+    switch (std::rand() % 2) { //NOLINT
         // 0: Vstup/výstup na horní/spodní straně
         case 0:
             grid.at(0).at(std::rand() % xSize).walls.top = false; // NOLINT(cert-msc30-c, cert-msc50-cpp)
@@ -141,6 +138,7 @@ void setEntranceAndExit(const int xSize, const int ySize, std::vector<std::vecto
             grid.at(std::rand() % ySize).at(xSize - 1).walls.right = false; // NOLINT(cert-msc30-c, cert-msc50-cpp)
             break;
         default:
+            break;
     }
 }
 

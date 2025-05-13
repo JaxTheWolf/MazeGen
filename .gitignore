@@ -77,3 +77,4 @@ fabric.properties
 *.svg
 
 cmake-build-debug
+/LUB0039_6.zip
