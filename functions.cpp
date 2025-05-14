@@ -52,11 +52,11 @@ int handleInput(const int argc, char *argv[], int *xSize, int *ySize, int *seed)
 /// @param grid Mřížka buňek
 void initGrid(const int xSize, const int ySize, std::vector<std::vector<Cell> > &grid) {
     // Musíme nastavit velikost vektoru v ose X
-    grid.resize(xSize);
-    for (int row = 0; row < xSize; row++) {
+    grid.resize(ySize);
+    for (int row = 0; row < ySize; row++) {
         // ... a také vektorů v ose Y
-        grid.at(row).resize(ySize);
-        for (int col = 0; col < ySize; col++) {
+        grid.at(row).resize(xSize);
+        for (int col = 0; col < xSize; col++) {
             // Zde se děje samosatatné plnění buňek
             grid.at(row).at(col) = Cell(col, row);
         }
@@ -110,7 +110,6 @@ void generateMaze(const int xSize, const int ySize, std::vector<std::vector<Cell
 
     while (!stack.empty()) {
         current = stack.top();
-
         if (auto possibleNeighbor = current->checkNeighbors(xSize, ySize, grid)) {
             Cell *next = &grid.at(possibleNeighbor.value()->y).at(possibleNeighbor.value()->x);
 
